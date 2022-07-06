@@ -1,3 +1,4 @@
+from settings import *
 import pygame
 import os
 
@@ -26,7 +27,7 @@ class PlayerAnimation:
         self.is_shoot = False
 
     def scale(self, im):
-        return pygame.transform.scale(im, (30, 45))
+        return pygame.transform.scale(im, (WIDTH/23, HEIGHT*(9/92)))
 
     def shoot(self):
         self.shoot_count = self.animations["Shoot"]["max"]

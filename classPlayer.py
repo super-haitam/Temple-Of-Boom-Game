@@ -1,4 +1,5 @@
 from animation import PlayerAnimation
+from classBullet import Bullet
 from settings import *
 import pygame
 
@@ -18,6 +19,9 @@ class Player:
         self.jump_count = 0
 
         self.bullets = []
+
+    def removeBullet(self, bullet):
+        self.bullets.pop(self.bullets.index(bullet))
 
     def applyGravity(self):
         self.gravity += .2
@@ -40,7 +44,7 @@ class Player:
             self.resetJump()
 
     def handleMovement(self):
-        ### Right/Left Movement + Jump ###
+        ### Right/Left Movement + Jump + Move Bullets###
         self.applyGravity()
         self.handleJump()
 
@@ -57,6 +61,9 @@ class Player:
 
             self.animation.direction = "Left"
             self.animation.state = "Walk"
+
+        for bullet in self.bullets:
+            bullet.move()
 
     def handleCollision(self, rect):
          # When the ground stops you from Fall Death 
@@ -77,7 +84,12 @@ class Player:
 
     def shoot(self):
         self.animation.shoot()
+
+        self.bullets.append(Bullet(self.animation.direction, self.rect))
     
     def draw(self, screen):
         self.animation.animate()
         screen.blit(self.animation.image, self.rect.topleft)
+
+        for bullet in self.bullets:
+            bullet.draw(screen)

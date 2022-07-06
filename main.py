@@ -50,8 +50,15 @@ class Game:
 
             for x, y, surf in ground_tile.tiles():
                 rect = pygame.Rect([x*tile_size, y*tile_size, tile_size, tile_size])
+                
+                # Collision with self.player.rect
                 if rect.colliderect(self.player.rect):
                     self.player.handleCollision(rect)
+                
+                # Collision with bullet in self.player.Bullets
+                for bullet in self.player.bullets:
+                    if rect.colliderect(bullet.rect):
+                        self.player.removeBullet(bullet)
 
             self.draw()
 
