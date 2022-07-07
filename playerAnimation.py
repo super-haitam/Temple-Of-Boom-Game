@@ -5,8 +5,8 @@ import os
 
 class PlayerAnimation:
     def __init__(self, direction: str, state: str):
-        self.state = state
         self.direction = direction
+        self.state = state
 
         image = pygame.image.load(f"./assets/Player/{direction}/{state}/{state}0.png")
         self.image = self.scale(image)
@@ -23,7 +23,7 @@ class PlayerAnimation:
         self.speed = .25
 
         self.shoot_count: int
-        self.shoot_speed = .1
+        self.shoot_speed = .3
         self.is_shoot = False
 
     def scale(self, im):
@@ -35,9 +35,9 @@ class PlayerAnimation:
 
     def animate(self):
         # This is drawn in the draw() method of Player class
-        num = self.animations[self.state]["num"]
+        num = int(self.animations[self.state]["num"])
         image = pygame.image.load(
-            f"./assets/Player/{self.direction}/{self.state}/{self.state}{int(num)}.png")
+            f"./assets/Player/{self.direction}/{self.state}/{self.state}{num}.png")
         self.image = self.scale(image)
 
         # In case of Shooting
