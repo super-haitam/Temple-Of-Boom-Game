@@ -1,10 +1,11 @@
 from playerAnimation import PlayerAnimation
+from classSprite import Sprite
 from classBullet import Bullet
 from settings import *
 import pygame
 
 
-class Player:
+class Player(Sprite):
     def __init__(self):
         # Animate the player
         self.animation = PlayerAnimation("Right", "Stand")
@@ -18,6 +19,9 @@ class Player:
         self.resetJump()
 
         self.bullets = []
+
+        self.health = self.max_health = 30
+        self.shoot_attack = 3
 
     def removeBullet(self, bullet):
         self.bullets.pop(self.bullets.index(bullet))
@@ -46,6 +50,10 @@ class Player:
         ### Right/Left Movement + Jump + Move Bullets ###
         self.handleJump()
         self.applyGravity()
+
+        # Not allow going off screen by Top
+        if self.rect.y < 0:
+            self.resetJump()
 
         self.animation.state = "Stand"
 
@@ -88,9 +96,17 @@ class Player:
         self.animation.shoot()
         self.bullets.append(Bullet(self.animation.direction, self.rect))
     
+    def draw_bar(self, screen):
+        bar_rect = pygame.Rect([0, 0, self.health, HEIGHT/92])
+        bar_rect.bottom = self.rect.top
+        bar_rect.centerx = self.rect.centerx
+
+        pygame.draw.rect(screen, GREEN, bar_rect)
+
     def draw(self, screen):
         self.animation.animate()
         screen.blit(self.animation.image, self.rect.topleft)
+        self.draw_bar(screen)
 
         for bullet in self.bullets:
             bullet.draw(screen)

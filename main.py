@@ -2,6 +2,7 @@ from pytmx.util_pygame import load_pygame
 from classPlayer import Player
 from classEnemy import Enemy
 from settings import *
+import random
 import pygame
 pygame.init()
 
@@ -23,8 +24,15 @@ class Game:
 
         self.player = Player()
 
-        obj = objects_dict["RightSpawn1"]
-        self.enemy = Enemy("Right", (obj.x, obj.y))
+        self.enemies = []
+        for i in range(3):
+            d = random.choice(["Left", "Right", "Top"])
+            obj = objects_dict["TopSpawn"]
+            if d in ["Left", "Right"]:
+                rand = random.choice([1, 2])
+                obj = objects_dict[d + "Spawn" + str(rand) + "-B"]
+            enemy = Enemy(d, (obj.x, obj.y))
+            self.enemies.append(enemy)
 
     def draw(self):
         screen.fill(WHITE)
@@ -33,7 +41,9 @@ class Game:
             screen.blit(surf, (x*tile_size, y*tile_size))
 
         self.player.draw(screen)
-        self.enemy.draw(screen)
+
+        for enemy in self.enemies:
+            enemy.draw(screen)
         
         pygame.display.flip()
 
@@ -55,10 +65,23 @@ class Game:
                     elif event.key == pygame.K_d and not self.player.animation.is_shoot:
                         self.player.shoot()
 
-            # Move the player and enemy
+            # Move the player
             self.player.handleMovement()
-            self.enemy.move()
 
+            # Move self.enemies and Handle Collision with self.player.bullets
+            for enemy in self.enemies:
+                enemy.move()
+
+                hit_bullet = enemy.getBulletHitBy(self.player.bullets)
+                if hit_bullet:
+                    enemy.damage(self.player.shoot_attack)
+                    self.player.removeBullet(hit_bullet)
+
+                    # Remove any dead enemies
+                    if not enemy.is_alive:
+                        self.enemies.pop(self.enemies.index(enemy))
+
+            # Handle Collisions with Ground
             for x, y, surf in ground_tile.tiles():
                 rect = pygame.Rect([x*tile_size, y*tile_size, tile_size, tile_size])
                 
@@ -66,13 +89,40 @@ class Game:
                 if rect.colliderect(self.player.rect):
                     self.player.handleCollision(rect)
 
-                if rect.colliderect(self.enemy.rect):
-                    self.enemy.handleCollision(rect)
+                # Collision with enemies.rect
+                for enemy in self.enemies:
+                    if rect.colliderect(enemy.rect):
+                        enemy.handleCollision(rect)
                 
                 # Collision with bullet in self.player.Bullets
                 for bullet in self.player.bullets:
                     if rect.colliderect(bullet.rect):
                         self.player.removeBullet(bullet)
+
+            # Teleportation 
+            sprites = [self.player] + self.enemies + self.player.bullets
+            for sprite in sprites:
+                # Going off the right side and spawning in the left side
+                if WIDTH < sprite.rect.centerx:
+                    if (objects_dict["RightSpawn1-A"].y <= sprite.rect.y) and \
+                            (sprite.rect.bottom <= objects_dict["RightSpawn1-B"].y):
+                        obj = objects_dict["LeftSpawn1-B"]
+                        sprite.spawn((obj.x, obj.y))
+                    elif (objects_dict["RightSpawn2-A"].y <= sprite.rect.y) and \
+                            (sprite.rect.bottom <= objects_dict["RightSpawn2-B"].y):
+                        obj = objects_dict["LeftSpawn2-B"]
+                        sprite.spawn((obj.x, obj.y))
+
+                # Going off the left side and spawning in the right side
+                elif sprite.rect.centerx <= 0:
+                    if (objects_dict["LeftSpawn1-A"].y <= sprite.rect.y) and \
+                            (sprite.rect.bottom <= objects_dict["LeftSpawn1-B"].y):
+                        obj = objects_dict["RightSpawn1-B"]
+                        sprite.spawn((obj.x, obj.y))
+                    elif (objects_dict["LeftSpawn2-A"].y <= sprite.rect.y) and \
+                            (sprite.rect.bottom <= objects_dict["LeftSpawn2-B"].y):
+                        obj = objects_dict["RightSpawn2-B"]
+                        sprite.spawn((obj.x, obj.y))
 
             self.draw()
 

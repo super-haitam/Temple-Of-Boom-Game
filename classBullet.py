@@ -15,6 +15,10 @@ class Bullet:
 
         self.speed = 4
 
+    def spawn(self, pos: tuple):
+        # Spawn only X position
+        self.rect.centerx = pos[0]
+
     def move(self):
         dic = {"Right": 1, "Left": -1}
         self.rect.x += self.speed * dic[self.direction]
