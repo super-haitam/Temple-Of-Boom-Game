@@ -26,6 +26,11 @@ class PlayerAnimation:
         self.shoot_speed = .3
         self.is_shoot = False
 
+    def changeState(self, state: str):
+        if self.state != state:
+            self.animations[self.state]["num"] = 0
+            self.state = state
+
     def scale(self, im):
         return pygame.transform.scale(im, (WIDTH/23, HEIGHT*(9/92)))
 

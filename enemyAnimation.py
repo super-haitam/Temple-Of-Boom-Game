@@ -20,7 +20,13 @@ class EnemyAnimation:
             self.animations[animation]["max"] = len(os.listdir(path)) - 1
             self.animations[animation]["num"] = 0
 
+        self.attack_speed = .2
         self.speed = .25
+
+    def changeState(self, state: str):
+        if self.state != state:
+            self.animations[self.state]["num"] = 0
+            self.state = state
 
     def scale(self, image):
         return pygame.transform.scale(image, (WIDTH/30, HEIGHT*(3/37)))
@@ -31,6 +37,10 @@ class EnemyAnimation:
             f"./assets/Enemy/{self.direction}/{self.state}/{self.state}{num}.png")
         self.image = self.scale(image)
 
-        self.animations[self.state]["num"] += self.speed
+        if self.state == "Attack":
+            self.animations["Attack"]["num"] += self.attack_speed
+        else:
+            self.animations[self.state]["num"] += self.speed
+
         if int(self.animations[self.state]["num"]) == self.animations[self.state]["max"]:
             self.animations[self.state]["num"] = 0

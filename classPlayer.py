@@ -20,8 +20,11 @@ class Player(Sprite):
 
         self.bullets = []
 
-        self.health = self.max_health = 30
+        self.health = 30
         self.shoot_attack = 3
+
+    def damage(self, amount):
+        self.health -= amount
 
     def removeBullet(self, bullet):
         self.bullets.pop(self.bullets.index(bullet))
@@ -62,12 +65,12 @@ class Player(Sprite):
             self.rect.x += self.speed
 
             self.animation.direction = "Right"
-            self.animation.state = "Walk"
+            self.animation.changeState("Walk")
         elif pressed[pygame.K_LEFT]:
             self.rect.x -= self.speed
 
             self.animation.direction = "Left"
-            self.animation.state = "Walk"
+            self.animation.changeState("Walk")
 
         # Move Bullets and Destroy them when Out Of Bounds
         for bullet in self.bullets:
@@ -75,7 +78,7 @@ class Player(Sprite):
             if (bullet.rect.right <= 0) or (WIDTH <= bullet.rect.left):
                 self.removeBullet(bullet)
 
-    def handleCollision(self, rect):
+    def handleGroundCollision(self, rect):
         # When the ground stops you from Fall Death 
         if self.rect.centery < rect.top <= self.rect.bottom:
             self.rect.bottom = rect.top

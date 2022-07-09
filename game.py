@@ -68,10 +68,18 @@ class Game:
             # Move the player
             self.player.handleMovement()
 
-            # Move self.enemies and Handle Collision with self.player.bullets
             for enemy in self.enemies:
+                # Move self.enemies
                 enemy.move()
+                if enemy.rect.colliderect(self.player.rect):
+                    # Handle Collision with self.player
+                    enemy.is_player_collision = True
+                    enemy.handlePlayerCollision(self.player)
+                else:
+                    enemy.is_player_collision = False
+                    enemy.animation.changeState("Walk")
 
+                # Handle Collision with self.player.bullets
                 hit_bullet = enemy.getBulletHitBy(self.player.bullets)
                 if hit_bullet:
                     enemy.damage(self.player.shoot_attack)
@@ -87,12 +95,12 @@ class Game:
                 
                 # Collision with self.player.rect
                 if rect.colliderect(self.player.rect):
-                    self.player.handleCollision(rect)
+                    self.player.handleGroundCollision(rect)
 
                 # Collision with enemies.rect
                 for enemy in self.enemies:
                     if rect.colliderect(enemy.rect):
-                        enemy.handleCollision(rect)
+                        enemy.handleGroundCollision(rect)
                 
                 # Collision with bullet in self.player.Bullets
                 for bullet in self.player.bullets:

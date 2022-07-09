@@ -8,9 +8,9 @@ class Bullet:
         self.rect = pygame.Rect([0, 0, WIDTH/86, HEIGHT/78])
 
         if self.direction == "Right":
-            self.rect.left = player_rect.right
+            self.rect.centerx = player_rect.right
         elif self.direction == "Left":
-            self.rect.right = player_rect.left
+            self.rect.centerx = player_rect.left
         self.rect.centery = player_rect.centery
 
         self.speed = 4

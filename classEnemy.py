@@ -7,14 +7,13 @@ import random
 
 class Enemy(Sprite):
     def __init__(self, spawn_pos: str, pos: tuple):
-        self.direction = "Left" if spawn_pos == "Right" else "Right"
+        direction = "Left" if spawn_pos == "Right" else "Right"
         if spawn_pos == "Top":  # Do random When Top
-            self.direction = random.choice(["Right", "Left"])
+            direction = random.choice(["Right", "Left"])
 
-        self.animation = EnemyAnimation(self.direction, "Walk")
+        self.animation = EnemyAnimation(direction, "Walk")
         
         self.rect = self.animation.image.get_rect()
-
         self.spawn(pos)
 
         self.gravity = 0
@@ -23,14 +22,38 @@ class Enemy(Sprite):
         self.last_x = -1
         self.resetJump()
 
+        self.attack = 2
+        self.health = 10
         self.is_alive = True
-        self.health = self.max_health = 10
+
+        self.is_player_collision = False
+
+    def attackPlayer(self, player):
+        self.animation.changeState("Attack")
+
+        num = int(self.animation.animations["Attack"]["num"] + self.animation.speed)
+        if num == self.animation.animations["Attack"]["max"]:
+            player.damage(self.attack)
 
     def applyGravity(self):
         self.gravity += .2
         self.rect.y += self.gravity
 
-    def handleCollision(self, rect):
+    def handlePlayerCollision(self, player):
+        rect = player.rect
+        # Right Collision
+        if (self.rect.centerx < rect.left <= self.rect.right) and \
+                (self.animation.direction == "Right"):
+            self.attackPlayer(player)
+            self.rect.right = rect.left
+
+        # Left Collision
+        elif (self.rect.left <= rect.right < self.rect.centerx) and \
+                (self.animation.direction == "Left"):
+            self.attackPlayer(player)
+            self.rect.left = rect.right
+
+    def handleGroundCollision(self, rect):
         # When the ground stops you from Fall Death 
         if self.rect.centery < rect.top <= self.rect.bottom:
             self.rect.bottom = rect.top
@@ -69,16 +92,17 @@ class Enemy(Sprite):
 
     def move(self):
         # Jump when Enemy.rect is blocked by something while walking on the ground
-        if (self.rect.x == self.last_x) and self.gravity == 0:
+        if (self.rect.x == self.last_x) and (self.gravity == 0) and \
+                (not self.is_player_collision):  # So that it doesn't jump over game.player
             self.jump()
         self.last_x = self.rect.x
         
         self.applyGravity()
         self.handleJump()
 
-        if self.direction == "Left":
+        if self.animation.direction == "Left":
             self.rect.x -= self.speed
-        elif self.direction == "Right":
+        elif self.animation.direction == "Right":
             self.rect.x += self.speed
 
     def damage(self, amount):
