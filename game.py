@@ -8,6 +8,7 @@ pygame.init()
 
 
 # Screen
+pygame.display.set_caption("Platformer-Game")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 tmx_data = load_pygame("Tiled-Assets/Map.tmx")
@@ -35,7 +36,7 @@ class Game:
             self.enemies.append(enemy)
 
     def draw(self):
-        screen.fill(WHITE)
+        screen.fill(BLACK)
 
         for x, y, surf in ground_tile.tiles(): 
             screen.blit(surf, (x*tile_size, y*tile_size))
