@@ -27,6 +27,7 @@ class Enemy(Sprite):
         self.is_alive = True
 
         self.is_player_collision = False
+        self.is_enemy_collision = False
 
     def attackPlayer(self, player):
         self.animation.changeState("Attack")
@@ -38,6 +39,21 @@ class Enemy(Sprite):
     def applyGravity(self):
         self.gravity += .2
         self.rect.y += self.gravity
+
+    def handleEnemyCollision(self, rect):
+        # When the Enemy is on top of an other Enemy
+        if self.rect.topleft == rect.topleft:
+            self.rect.right = rect.left  # OR self.rect.left = rect.right
+
+        # Right Collision
+        elif (self.rect.centerx < rect.left <= self.rect.right) and \
+                (self.animation.direction == "Right"):
+            self.rect.right = rect.left
+
+        # Left Collision
+        elif (self.rect.left <= rect.right < self.rect.centerx) and \
+                (self.animation.direction == "Left"):
+            self.rect.left = rect.right
 
     def handlePlayerCollision(self, player):
         rect = player.rect
@@ -93,7 +109,8 @@ class Enemy(Sprite):
     def move(self):
         # Jump when Enemy.rect is blocked by something while walking on the ground
         if (self.rect.x == self.last_x) and (self.gravity == 0) and \
-                (not self.is_player_collision):  # So that it doesn't jump over game.player
+                (not self.is_player_collision) and \
+                    (not self.is_enemy_collision):  # So that it doesn't jump over game.player
             self.jump()
         self.last_x = self.rect.x
         

@@ -1,8 +1,8 @@
-from pytmx.util_pygame import load_pygame
+from handleMap import MapHandler
+from classEnemies import Enemies
 from classPlayer import Player
 from classEnemy import Enemy
 from settings import *
-import random
 import pygame
 pygame.init()
 
@@ -11,12 +11,8 @@ pygame.init()
 pygame.display.set_caption("Platformer-Game")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-tmx_data = load_pygame("Tiled-Assets/Map.tmx")
-ground_tile = tmx_data.get_layer_by_name("Ground")
-
-objects_dict = {}
-for obj in tmx_data.objects:
-    objects_dict[obj.name] = obj
+# Tmx map
+map_handler = MapHandler(1)
 
 
 class Game:
@@ -25,26 +21,20 @@ class Game:
 
         self.player = Player()
 
-        self.enemies = []
-        for i in range(3):
-            d = random.choice(["Left", "Right", "Top"])
-            obj = objects_dict["TopSpawn"]
-            if d in ["Left", "Right"]:
-                rand = random.choice([1, 2])
-                obj = objects_dict[d + "Spawn" + str(rand) + "-B"]
-            enemy = Enemy(d, (obj.x, obj.y))
-            self.enemies.append(enemy)
+        self.enemies = Enemies()
+        self.enemies.addEnemy(3, map_handler.objects_dict)
 
     def draw(self):
         screen.fill(BLACK)
 
-        for x, y, surf in ground_tile.tiles(): 
-            screen.blit(surf, (x*tile_size, y*tile_size))
+        # Draw Ground
+        map_handler.draw(screen)
 
+        # Draw Player
         self.player.draw(screen)
 
-        for enemy in self.enemies:
-            enemy.draw(screen)
+        # Draw Enemies
+        self.enemies.draw(screen)
         
         pygame.display.flip()
 
@@ -69,29 +59,11 @@ class Game:
             # Move the player
             self.player.handleMovement()
 
-            for enemy in self.enemies:
-                # Move self.enemies
-                enemy.move()
-                if enemy.rect.colliderect(self.player.rect):
-                    # Handle Collision with self.player
-                    enemy.is_player_collision = True
-                    enemy.handlePlayerCollision(self.player)
-                else:
-                    enemy.is_player_collision = False
-                    enemy.animation.changeState("Walk")
-
-                # Handle Collision with self.player.bullets
-                hit_bullet = enemy.getBulletHitBy(self.player.bullets)
-                if hit_bullet:
-                    enemy.damage(self.player.shoot_attack)
-                    self.player.removeBullet(hit_bullet)
-
-                    # Remove any dead enemies
-                    if not enemy.is_alive:
-                        self.enemies.pop(self.enemies.index(enemy))
+            # Handle Movement of enemies
+            self.enemies.handleMovement(self.player)
 
             # Handle Collisions with Ground
-            for x, y, surf in ground_tile.tiles():
+            for x, y, surf in map_handler.ground_tile.tiles():
                 rect = pygame.Rect([x*tile_size, y*tile_size, tile_size, tile_size])
                 
                 # Collision with self.player.rect
@@ -99,38 +71,16 @@ class Game:
                     self.player.handleGroundCollision(rect)
 
                 # Collision with enemies.rect
-                for enemy in self.enemies:
-                    if rect.colliderect(enemy.rect):
-                        enemy.handleGroundCollision(rect)
+                self.enemies.handleGroundCollision(rect)
                 
                 # Collision with bullet in self.player.Bullets
                 for bullet in self.player.bullets:
                     if rect.colliderect(bullet.rect):
                         self.player.removeBullet(bullet)
 
-            # Teleportation 
-            sprites = [self.player] + self.enemies + self.player.bullets
+            # Teleportation
+            sprites = [self.player] + self.enemies.lst + self.player.bullets
             for sprite in sprites:
-                # Going off the right side and spawning in the left side
-                if WIDTH < sprite.rect.centerx:
-                    if (objects_dict["RightSpawn1-A"].y <= sprite.rect.y) and \
-                            (sprite.rect.bottom <= objects_dict["RightSpawn1-B"].y):
-                        obj = objects_dict["LeftSpawn1-B"]
-                        sprite.spawn((obj.x, obj.y))
-                    elif (objects_dict["RightSpawn2-A"].y <= sprite.rect.y) and \
-                            (sprite.rect.bottom <= objects_dict["RightSpawn2-B"].y):
-                        obj = objects_dict["LeftSpawn2-B"]
-                        sprite.spawn((obj.x, obj.y))
-
-                # Going off the left side and spawning in the right side
-                elif sprite.rect.centerx <= 0:
-                    if (objects_dict["LeftSpawn1-A"].y <= sprite.rect.y) and \
-                            (sprite.rect.bottom <= objects_dict["LeftSpawn1-B"].y):
-                        obj = objects_dict["RightSpawn1-B"]
-                        sprite.spawn((obj.x, obj.y))
-                    elif (objects_dict["LeftSpawn2-A"].y <= sprite.rect.y) and \
-                            (sprite.rect.bottom <= objects_dict["LeftSpawn2-B"].y):
-                        obj = objects_dict["RightSpawn2-B"]
-                        sprite.spawn((obj.x, obj.y))
+                map_handler.handleGroundCollision(sprite)
 
             self.draw()
