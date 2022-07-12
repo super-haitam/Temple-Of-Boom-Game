@@ -12,7 +12,7 @@ pygame.display.set_caption("Platformer-Game")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Tmx map
-map_handler = MapHandler(2)
+map_handler = MapHandler(1)
 
 
 class Game:
@@ -22,7 +22,10 @@ class Game:
         self.player = Player()
 
         self.enemies = Enemies()
-        self.enemies.addEnemy(3, map_handler.objects_dict)
+        self.enemies.addEnemy(1, map_handler.objects_dict)
+
+        self.map_num = 1
+        self.round = 1
 
     def draw(self):
         screen.fill(BLACK)
@@ -83,6 +86,7 @@ class Game:
             for sprite in sprites:
                 map_handler.handleTeleport(sprite)
 
+            # Enemy Random Jump at Jump Points
             for jump in map_handler.objects_dict:
                 if jump.count("LeftJump"):
                     for enemy in self.enemies.lst:
@@ -94,5 +98,10 @@ class Game:
                         jump_pt = map_handler.objects_dict[jump]
                         enemy.handleJumpPointCollision("Right",
                             (jump_pt.x, jump_pt.y-1))
+
+            # Rounds
+            if not self.enemies.lst:
+                self.round += 1
+                self.enemies.addEnemy(self.round, map_handler.objects_dict)                
 
             self.draw()

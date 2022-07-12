@@ -8,9 +8,6 @@ class PlayerAnimation:
         self.direction = direction
         self.state = state
 
-        image = pygame.image.load(f"./assets/Player/{direction}/{state}/{state}0.png")
-        self.image = self.scale(image)
-
         self.animations = {}
         for animation in ["Stand", "Walk", "Shoot", "Die"]:
             path = "./assets/Player/Left/" + animation
@@ -19,6 +16,16 @@ class PlayerAnimation:
             # Num of animations
             self.animations[animation]["max"] = len(os.listdir(path)) - 1
             self.animations[animation]["num"] = 0
+
+        # Scaled_images Dict to have less run time; Cuz we load & scale each time
+        self.scaled_images = {}
+        for d in ["Left", "Right"]:
+            for s in ["Shoot", "Die", "Stand", "Walk"]:
+                for num in range(self.animations[s]["max"]):
+                    im = pygame.image.load(f"./assets/Player/{d}/{s}/{s}{num}.png")
+                    self.scaled_images[f"{d}/{s}{num}"] = self.scale(im)
+
+        self.image = self.scaled_images[f"{direction}/{state}0"]
 
         self.speed = .25
 
@@ -41,16 +48,12 @@ class PlayerAnimation:
     def animate(self):
         # This is drawn in the draw() method of Player class
         num = int(self.animations[self.state]["num"])
-        image = pygame.image.load(
-            f"./assets/Player/{self.direction}/{self.state}/{self.state}{num}.png")
-        self.image = self.scale(image)
+        self.image = self.scaled_images[f"{self.direction}/{self.state}{num}"]
 
         # In case of Shooting
         if self.is_shoot:
             num = self.animations["Shoot"]["max"] - self.shoot_count
-            image = pygame.image.load(
-                f"./assets/Player/{self.direction}/Shoot/Shoot{int(num)}.png")
-            self.image = self.scale(image)
+            self.image = self.scaled_images[f"{self.direction}/Shoot{int(num)}"]
 
             self.shoot_count -= self.shoot_speed
             if int(self.shoot_count) == 0:

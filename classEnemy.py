@@ -95,10 +95,10 @@ class Enemy(Sprite):
             self.rect.top = rect.bottom
 
     def handleJumpPointCollision(self, direction: str, jump_pos: tuple):
-        zeros = [0 for _ in range(int(self.rect.width/self.speed))]
+        zeros = [0 for _ in range(int(1.6*self.rect.width/self.speed))]
         if self.rect.collidepoint(jump_pos) and \
                     self.animation.direction == direction:
-            if random.choice(zeros*2 + [1]):
+            if random.choice(zeros + [1]):
                 self.jump()
 
     # JUMP
