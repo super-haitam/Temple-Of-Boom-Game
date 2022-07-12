@@ -1,5 +1,6 @@
 from settings import *
 import pygame
+import time
 
 
 class Bullet:
@@ -14,6 +15,12 @@ class Bullet:
         self.rect.centery = player_rect.centery
 
         self.speed = 4
+
+        self.fire_time = time.time()
+        self.lifetime = 4
+
+    def getTimeUp(self):
+        return self.lifetime < (time.time() - self.fire_time)
 
     def spawn(self, pos: tuple):
         # Spawn only X position

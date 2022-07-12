@@ -12,7 +12,7 @@ pygame.display.set_caption("Platformer-Game")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Tmx map
-map_handler = MapHandler(1)
+map_handler = MapHandler(3)
 
 
 class Game:

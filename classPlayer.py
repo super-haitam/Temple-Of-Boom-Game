@@ -99,9 +99,12 @@ class Player(Sprite):
             self.animation.direction = "Left"
             self.animation.changeState("Walk")
 
-        # Move Bullets and Destroy them when Out Of Bounds
+        # Move Bullets and Destroy them when Time's Up
         for bullet in self.bullets:
             bullet.move()
+
+            if bullet.getTimeUp():
+                self.bullets.pop(self.bullets.index(bullet))
     
     # DRAW
     def draw_bar(self, screen):
