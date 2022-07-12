@@ -29,6 +29,12 @@ class Enemy(Sprite):
         self.is_player_collision = False
         self.is_enemy_collision = False
 
+    # GRAVITY
+    def applyGravity(self):
+        self.gravity += .2
+        self.rect.y += self.gravity
+
+    # PLAYER INTERACTION
     def attackPlayer(self, player):
         self.animation.changeState("Attack")
 
@@ -36,10 +42,13 @@ class Enemy(Sprite):
         if num == self.animation.animations["Attack"]["max"]:
             player.damage(self.attack)
 
-    def applyGravity(self):
-        self.gravity += .2
-        self.rect.y += self.gravity
+    def damage(self, amount):
+        self.health -= amount
 
+        if self.health <= 0:
+            self.is_alive = False
+
+    # COLLISION HANDLING
     def handleEnemyCollision(self, rect):
         # When the Enemy is on top of an other Enemy
         if self.rect.topleft == rect.topleft:
@@ -69,7 +78,7 @@ class Enemy(Sprite):
             self.attackPlayer(player)
             self.rect.left = rect.right
 
-    def handleGroundCollision(self, rect):
+    def handleGroundCollision(self, rect: pygame.Rect):
         # When the ground stops you from Fall Death 
         if self.rect.centery < rect.top <= self.rect.bottom:
             self.rect.bottom = rect.top
@@ -85,10 +94,18 @@ class Enemy(Sprite):
         elif self.rect.top <= rect.bottom < self.rect.centery:
             self.rect.top = rect.bottom
 
+    def handleJumpPointCollision(self, direction: str, jump_pos: tuple):
+        zeros = [0 for _ in range(int(self.rect.width/self.speed))]
+        if self.rect.collidepoint(jump_pos) and \
+                    self.animation.direction == direction:
+            if random.choice(zeros*2 + [1]):
+                self.jump()
+
+    # JUMP
     def jump(self):
         if not self.is_jump:
             self.is_jump = True
-            self.jump_count = 12
+            self.jump_count = 14
 
     def resetJump(self):
         self.is_jump = False
@@ -106,6 +123,7 @@ class Enemy(Sprite):
             if bullet.rect.colliderect(self.rect):
                 return bullet
 
+    # MOVEMENT
     def move(self):
         # Jump when Enemy.rect is blocked by something while walking on the ground
         if (self.rect.x == self.last_x) and (self.gravity == 0) and \
@@ -122,12 +140,7 @@ class Enemy(Sprite):
         elif self.animation.direction == "Right":
             self.rect.x += self.speed
 
-    def damage(self, amount):
-        self.health -= amount
-
-        if self.health <= 0:
-            self.is_alive = False
-
+    # DRAW
     def draw_bar(self, screen):
         bar_rect = pygame.Rect([0, 0, self.health*3, HEIGHT/92])
         bar_rect.bottom = self.rect.top

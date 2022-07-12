@@ -1,5 +1,5 @@
-tile_size = 23
-WIDTH, HEIGHT = 30*tile_size, 20*tile_size
+tile_size = 20
+WIDTH, HEIGHT = 40*tile_size, 30*tile_size
 
 # Colors
 BLACK = (0, 0, 0)

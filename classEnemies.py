@@ -16,6 +16,7 @@ class Enemies:
             enemy = Enemy(d, (obj.x, obj.y))
             self.lst.append(enemy)
 
+    # HANDLE MOVEMENT
     def handleMovement(self, player):
         for enemy in self.lst:
             # Move self.enemies
@@ -35,6 +36,7 @@ class Enemies:
             # Handle Bullet Collision
             self.handleBulletCollision(enemy, player)
 
+    # COLLISION HANDLING
     def handleEnemyCollision(self, enemy):
         # Handle Collision with other enemies
         enemy.is_enemy_collision = False

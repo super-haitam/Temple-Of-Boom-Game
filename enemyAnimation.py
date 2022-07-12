@@ -8,9 +8,6 @@ class EnemyAnimation:
         self.direction = direction
         self.state = state
 
-        image = pygame.image.load(f"./assets/Enemy/{direction}/{state}/{state}0.png")
-        self.image = self.scale(image)
-
         self.animations = {}
         for animation in ["Stand", "Walk", "Attack", "Hurt", "Die"]:
             path = "./assets/Enemy/Left/" + animation
@@ -19,6 +16,16 @@ class EnemyAnimation:
             # Num of animations
             self.animations[animation]["max"] = len(os.listdir(path)) - 1
             self.animations[animation]["num"] = 0
+
+        # Scaled_images Dict to have less run time; Cuz we load & scale each time
+        self.scaled_images = {}
+        for d in ["Left", "Right"]:
+            for s in ["Attack", "Die", "Hurt", "Stand", "Walk"]:
+                for num in range(self.animations[s]["max"]):
+                    im = pygame.image.load(f"./assets/Enemy/{d}/{s}/{s}{num}.png")
+                    self.scaled_images[f"{d}/{s}{num}"] = self.scale(im)
+
+        self.image = self.scaled_images[f"{direction}/{state}0"]
 
         self.attack_speed = .2
         self.speed = .25
@@ -33,9 +40,7 @@ class EnemyAnimation:
 
     def animate(self):
         num = int(self.animations[self.state]["num"])
-        image = pygame.image.load(
-            f"./assets/Enemy/{self.direction}/{self.state}/{self.state}{num}.png")
-        self.image = self.scale(image)
+        self.image = self.scaled_images[f"{self.direction}/{self.state}{num}"]
 
         if self.state == "Attack":
             self.animations["Attack"]["num"] += self.attack_speed

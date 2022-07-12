@@ -23,16 +23,24 @@ class Player(Sprite):
         self.health = 30
         self.shoot_attack = 3
 
-    def damage(self, amount):
-        self.health -= amount
-
-    def removeBullet(self, bullet):
-        self.bullets.pop(self.bullets.index(bullet))
-
+    # GRAVITY
     def applyGravity(self):
         self.gravity += .2
         self.rect.y += self.gravity
 
+    # ENEMY INTERACTION
+    def damage(self, amount):
+        self.health -= amount
+
+    # SHOOTING & BULLETS
+    def shoot(self):
+        self.animation.shoot()
+        self.bullets.append(Bullet(self.animation.direction, self.rect))
+
+    def removeBullet(self, bullet):
+        self.bullets.pop(self.bullets.index(bullet))
+
+    # JUMP
     def jump(self):
         if not self.is_jump:
             self.is_jump = True
@@ -49,6 +57,25 @@ class Player(Sprite):
         else:
             self.resetJump()
 
+    # GROUND COLLISION
+    def handleGroundCollision(self, rect):
+        # When the ground stops you from Fall Death 
+        if self.rect.centery < rect.top <= self.rect.bottom:
+            self.rect.bottom = rect.top
+            self.gravity = 0
+        
+        # When walls stop you
+        elif self.rect.centerx < rect.left <= self.rect.right:
+            self.rect.right = rect.left
+        elif self.rect.left <= rect.right < self.rect.centerx:
+            self.rect.left = rect.right
+
+        # When you crash on the ceiling
+        elif self.rect.top <= rect.bottom < self.rect.centery:
+            self.rect.top = rect.bottom
+            self.resetJump()
+
+    # MOVEMENT
     def handleMovement(self):
         ### Right/Left Movement + Jump + Move Bullets ###
         self.handleJump()
@@ -75,30 +102,8 @@ class Player(Sprite):
         # Move Bullets and Destroy them when Out Of Bounds
         for bullet in self.bullets:
             bullet.move()
-            if (bullet.rect.right <= 0) or (WIDTH <= bullet.rect.left):
-                self.removeBullet(bullet)
-
-    def handleGroundCollision(self, rect):
-        # When the ground stops you from Fall Death 
-        if self.rect.centery < rect.top <= self.rect.bottom:
-            self.rect.bottom = rect.top
-            self.gravity = 0
-        
-        # When walls stop you
-        elif self.rect.centerx < rect.left <= self.rect.right:
-            self.rect.right = rect.left
-        elif self.rect.left <= rect.right < self.rect.centerx:
-            self.rect.left = rect.right
-
-        # When you crash on the ceiling
-        elif self.rect.top <= rect.bottom < self.rect.centery:
-            self.rect.top = rect.bottom
-            self.resetJump()
-
-    def shoot(self):
-        self.animation.shoot()
-        self.bullets.append(Bullet(self.animation.direction, self.rect))
     
+    # DRAW
     def draw_bar(self, screen):
         bar_rect = pygame.Rect([0, 0, self.health, HEIGHT/92])
         bar_rect.bottom = self.rect.top
