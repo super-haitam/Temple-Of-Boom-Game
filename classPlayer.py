@@ -82,6 +82,10 @@ class Player(Sprite):
 
     # MOVEMENT
     def handleMovement(self):
+        self.is_alive = self.animation.is_alive
+        if self.animation.is_dying:
+            return
+
         ### Right/Left Movement + Jump + Move Bullets ###
         self.handleJump()
         self.applyGravity()

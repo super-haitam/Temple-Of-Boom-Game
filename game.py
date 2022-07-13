@@ -108,4 +108,8 @@ class Game:
 
                 self.player.centerx = (WIDTH/2, HEIGHT/2)
 
+            # Player Death
+            if not self.player.is_alive:
+                break
+
             self.draw()
