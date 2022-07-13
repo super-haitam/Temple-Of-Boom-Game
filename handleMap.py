@@ -7,6 +7,8 @@ class MapHandler:
         self.changeMap(map_num)
 
     def changeMap(self, map_num: int):
+        self.map_num = map_num
+        
         self.tmx_data = load_pygame(f"Tiled-Assets/Map{map_num}.tmx")
         self.ground_tile = self.tmx_data.get_layer_by_name("Ground")
 

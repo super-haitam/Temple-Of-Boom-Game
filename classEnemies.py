@@ -4,6 +4,9 @@ import random
 
 class Enemies:
     def __init__(self):
+        self.resetLst()
+
+    def resetLst(self):
         self.lst = []
 
     def addEnemy(self, number: int, objects_dict: dict):
@@ -21,6 +24,10 @@ class Enemies:
         for enemy in self.lst:
             # Move self.enemies
             enemy.move()
+
+            # Remove any dead enemies
+            if not enemy.is_alive:
+                self.lst.pop(self.lst.index(enemy))
 
             if enemy.rect.colliderect(player.rect):
                 # Handle Collision with player
@@ -53,15 +60,23 @@ class Enemies:
             enemy.damage(player.shoot_attack)
             player.removeBullet(hit_bullet)
 
-            # Remove any dead enemies
-            if not enemy.is_alive:
-                self.lst.pop(self.lst.index(enemy))
-
     def handleGroundCollision(self, rect):
         for enemy in self.lst:
             if rect.colliderect(enemy.rect):
                 enemy.handleGroundCollision(rect)
 
+    def handleJumpPointCollision(self, objects_dict: dict, jump: str):
+        if jump.count("LeftJump"):
+            for enemy in self.lst:
+                jump_pt = objects_dict[jump]
+                enemy.handleJumpPointCollision("Left",
+                    (jump_pt.x, jump_pt.y-1))
+        elif jump.count("RightJump"):
+            for enemy in self.lst:
+                jump_pt = objects_dict[jump]
+                enemy.handleJumpPointCollision("Right",
+                    (jump_pt.x, jump_pt.y-1))
+    # Draw
     def draw(self, screen):
         for enemy in self.lst:
             enemy.draw(screen)

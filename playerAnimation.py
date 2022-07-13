@@ -33,6 +33,10 @@ class PlayerAnimation:
         self.shoot_speed = .3
         self.is_shoot = False
 
+        self.is_alive = True
+        self.is_dying = False
+        self.death_speed = .1
+
     def changeState(self, state: str):
         if self.state != state:
             self.animations[self.state]["num"] = 0
@@ -46,20 +50,30 @@ class PlayerAnimation:
         self.is_shoot = True
 
     def animate(self):
-        # This is drawn in the draw() method of Player class
-        num = int(self.animations[self.state]["num"])
-        self.image = self.scaled_images[f"{self.direction}/{self.state}{num}"]
+        if self.is_dying:
+            num = int(self.animations["Die"]["num"])
+            self.image = self.scaled_images[f"{self.direction}/Die{num}"]
 
-        # In case of Shooting
-        if self.is_shoot:
-            num = self.animations["Shoot"]["max"] - self.shoot_count
-            self.image = self.scaled_images[f"{self.direction}/Shoot{int(num)}"]
+            self.animations["Die"]["num"] += self.death_speed
 
-            self.shoot_count -= self.shoot_speed
-            if int(self.shoot_count) == 0:
-                self.is_shoot = False
+            if int(self.animations["Die"]["num"]) == self.animations["Die"]["max"]:
+                self.is_alive = False
 
         else:
-            self.animations[self.state]["num"] += self.speed
-            if int(self.animations[self.state]["num"]) == self.animations[self.state]["max"]:
-                self.animations[self.state]["num"] = 0
+            # This is drawn in the draw() method of Player class
+            num = int(self.animations[self.state]["num"])
+            self.image = self.scaled_images[f"{self.direction}/{self.state}{num}"]
+
+            # In case of Shooting
+            if self.is_shoot:
+                num = self.animations["Shoot"]["max"] - self.shoot_count
+                self.image = self.scaled_images[f"{self.direction}/Shoot{int(num)}"]
+
+                self.shoot_count -= self.shoot_speed
+                if int(self.shoot_count) == 0:
+                    self.is_shoot = False
+
+            else:
+                self.animations[self.state]["num"] += self.speed
+                if int(self.animations[self.state]["num"]) == self.animations[self.state]["max"]:
+                    self.animations[self.state]["num"] = 0

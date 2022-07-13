@@ -12,8 +12,10 @@ pygame.display.set_caption("Platformer-Game")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Tmx map
-map_handler = MapHandler(3)
+map_handler = MapHandler(1)
 
+# BackGround
+bg = pygame.image.load("assets/background.jpg")
 
 class Game:
     def __init__(self):
@@ -22,13 +24,16 @@ class Game:
         self.player = Player()
 
         self.enemies = Enemies()
-        self.enemies.addEnemy(1, map_handler.objects_dict)
 
-        self.map_num = 1
-        self.round = 1
+        self.round = 0
+        self.max_round = 2
+
+    def drawWelcome(self):
+        screen.blit(bg, (0, 0))
+        pygame.display.flip()
 
     def draw(self):
-        screen.fill(BLACK)
+        screen.blit(bg, (0, 0))
 
         # Draw Ground
         map_handler.draw(screen)
@@ -88,20 +93,19 @@ class Game:
 
             # Enemy Random Jump at Jump Points
             for jump in map_handler.objects_dict:
-                if jump.count("LeftJump"):
-                    for enemy in self.enemies.lst:
-                        jump_pt = map_handler.objects_dict[jump]
-                        enemy.handleJumpPointCollision("Left",
-                            (jump_pt.x, jump_pt.y-1))
-                elif jump.count("RightJump"):
-                    for enemy in self.enemies.lst:
-                        jump_pt = map_handler.objects_dict[jump]
-                        enemy.handleJumpPointCollision("Right",
-                            (jump_pt.x, jump_pt.y-1))
+                self.enemies.handleJumpPointCollision(map_handler.objects_dict, jump)
 
             # Rounds
             if not self.enemies.lst:
-                self.round += 1
-                self.enemies.addEnemy(self.round, map_handler.objects_dict)                
+                self.round += 2
+                self.enemies.addEnemy(self.round, map_handler.objects_dict)  
+
+            # Maps
+            if self.round == self.max_round+2:
+                map_handler.changeMap(map_handler.map_num+1)
+                self.enemies.resetLst()
+                self.round = 0
+
+                self.player.centerx = (WIDTH/2, HEIGHT/2)
 
             self.draw()

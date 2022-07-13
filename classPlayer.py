@@ -23,6 +23,8 @@ class Player(Sprite):
         self.health = 30
         self.shoot_attack = 3
 
+        self.is_alive = True
+
     # GRAVITY
     def applyGravity(self):
         self.gravity += .2
@@ -31,6 +33,9 @@ class Player(Sprite):
     # ENEMY INTERACTION
     def damage(self, amount):
         self.health -= amount
+
+        if self.health <= 0:
+            self.animation.is_dying = True
 
     # SHOOTING & BULLETS
     def shoot(self):

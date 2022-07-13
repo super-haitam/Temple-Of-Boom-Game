@@ -11,7 +11,7 @@ class Enemy(Sprite):
         if spawn_pos == "Top":  # Do random When Top
             direction = random.choice(["Right", "Left"])
 
-        self.animation = EnemyAnimation(direction, "Walk")
+        self.animation = EnemyAnimation(direction, "Stand")
         
         self.rect = self.animation.image.get_rect()
         self.spawn(pos)
@@ -45,14 +45,18 @@ class Enemy(Sprite):
     def damage(self, amount):
         self.health -= amount
 
+        self.animation.changeState("Hurt")
+
         if self.health <= 0:
-            self.is_alive = False
+            self.animation.is_dying = True
 
     # COLLISION HANDLING
     def handleEnemyCollision(self, rect):
-        # When the Enemy is on top of an other Enemy
-        if self.rect.topleft == rect.topleft:
-            self.rect.right = rect.left  # OR self.rect.left = rect.right
+        # When the Enemy is on an other Enemy
+        if (rect.left <= self.rect.left <= rect.centerx) or \
+                (rect.centerx <= self.rect.right <= rect.right):
+            if rect.y == self.rect.y:
+                self.rect.right = rect.left  # OR self.rect.left = rect.right
 
         # Right Collision
         elif (self.rect.centerx < rect.left <= self.rect.right) and \
@@ -125,6 +129,10 @@ class Enemy(Sprite):
 
     # MOVEMENT
     def move(self):
+        self.is_alive = self.animation.is_alive
+        if self.animation.is_dying:
+            return
+
         # Jump when Enemy.rect is blocked by something while walking on the ground
         if (self.rect.x == self.last_x) and (self.gravity == 0) and \
                 (not self.is_player_collision) and \
